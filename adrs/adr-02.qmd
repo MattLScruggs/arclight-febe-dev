@@ -1,0 +1,42 @@
+---
+title: "Architecture Decision Record (ADR) 002- Dataset Engineering"
+format: html
+---
+
+## Pre-training Data Strategy for Arclight-FEBE
+
+**Date:** October 2026
+
+### 1. Context and Problem Statement
+
+The Arclight-FEBE model is being engineered from scratch as a sub-1B parameter Small Language Model (SLM) designed to operate locally on constrained edge devices for field epidemiology. Because a small model acts as a lossy compression engine with a limited capacity of 1 to 2 bits of factual information per parameter, its training corpus must be meticulously curated to avoid wasting capacity on irrelevant noise. To achieve high semantic compression and reasoning capabilities without parameter bloat, the model must follow a "textbook paradigm," explicitly rejecting noisy, unvetted web datasets like raw Common Crawl. Furthermore, to align with public health requirements and ethical AI deployment, the training data must carry zero intellectual property risk, necessitating the exclusive use of public domain and openly licensed text.
+
+### 2. Decision
+
+We will pretrain the Arclight-FEBE core engine using a highly filtered subset of "The Common Pile v0.1.pdf", an 8TB dataset composed exclusively of public domain and openly licensed text.
+
+Specifically, the pretraining mixture will be restricted to the following ten domain-dense and foundational sources derived from the common-pile project:
+
+- **Scientific & Medical Text:** PubMed, arXiv, and Wikipedia extracts.
+
+- **Public Domain Books & Archives:** Biodiversity Heritage Library (BHL), Library of Congress, and Project Gutenberg.
+
+- **Open Educational Resources (OER):** Directory of Open Access Books (DOAB), OER Commons, LibreTexts, and Pressbooks.
+
+### 3. Rationale
+
+- **Empirically Validated Performance:** According to the findings in [Kandpal et al (2025)](https://arxiv.org/abs/2506.05209), training models exclusively on openly licensed text does not compromise downstream capabilities. The study's Comma v0.1-1T and Comma v0.1-2T models (trained on 1 and 2 trillion tokens from the Common Pile, respectively) achieved competitive zero-shot performance on knowledge and reasoning benchmarks (such as ARC, MMLU, and OpenBookQA) compared to budget-matched models trained on unlicensed data, such as Llama 1 and 2.
+
+- **Domain Density & Signal-to-Noise Ratio:** By focusing on PubMed, arXiv, and BHL, we heavily weight the model's internal parameter pathways toward epidemiological concepts, biological literature, and clinical terminology. This guarantees that the model masters complex jargon without the semantic interference of broad internet scrape data.
+
+- **Strict Legal & Ethical Compliance:** Relying exclusively on sources vetted by the Common Pile project ensures that all ingested text meets the Open Knowledge Foundation's Open Definition 2.1 (e.g., CC BY, CC BY-SA, CC0, and public domain). This immunizes the Arclight-FEBE framework against copyright infringement and aligns with the transparency required for public health software.
+
+### 4. Consequences and Mitigations
+
+- **Consequence: The "World Knowledge Cliff" Risk.** Training an SLM exclusively on specialized technical literature (like PubMed or arXiv) can lead to over-specialization, where the model learns clinical terms but fails to grasp fundamental causal logic or varied sentence structures.
+
+  - Mitigation: We are incorporating high-quality, generalist educational text via Wikipedia extracts, Project Gutenberg, DOAB, LibreTexts, OER Commons, and Pressbooks. This ensures that 20% to 30% of the data mixture anchors the model's foundational grammar, syntactic flexibility, and basic world logic, preventing repetitive loops and maintaining conversational coherence.
+
+- **Consequence: Data Processing Overhead for Specialized Formats.** Extracting clean text from legacy PDFs, scientific LaTeX files (arXiv), and raw encyclopedic dumps (Wikipedia) introduces complex extraction challenges, such as parsing column layouts, stripping MediaWiki markdown, and removing structural boilerplate.
+
+  - Mitigation: The datasets sourced via "The Common Pile v0.1.pdf" have already undergone significant preprocessing, including language identification, personally identifiable information (PII) redaction, document-level fuzzy deduplication, and the conversion of mathematical expressions to LaTeX. This drastically reduces the data engineering burden required before tokenization and model training.
