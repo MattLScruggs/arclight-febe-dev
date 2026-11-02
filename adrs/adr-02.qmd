@@ -13,7 +13,7 @@ The Arclight-FEBE model is being engineered from scratch as a sub-1B parameter S
 
 ### 2. Decision
 
-We will pretrain the Arclight-FEBE core engine using a highly filtered subset of "The Common Pile v0.1.pdf", an 8TB dataset composed exclusively of public domain and openly licensed text.
+We will pretrain the Arclight-FEBE core engine using a highly filtered subset of Common Pile v0.1, an 8TB dataset composed exclusively of public domain and openly licensed text.
 
 Specifically, the pretraining mixture will be restricted to the following ten domain-dense and foundational sources derived from the common-pile project:
 
@@ -39,4 +39,4 @@ Specifically, the pretraining mixture will be restricted to the following ten do
 
 - **Consequence: Data Processing Overhead for Specialized Formats.** Extracting clean text from legacy PDFs, scientific LaTeX files (arXiv), and raw encyclopedic dumps (Wikipedia) introduces complex extraction challenges, such as parsing column layouts, stripping MediaWiki markdown, and removing structural boilerplate.
 
-  - Mitigation: The datasets sourced via "The Common Pile v0.1.pdf" have already undergone significant preprocessing, including language identification, personally identifiable information (PII) redaction, document-level fuzzy deduplication, and the conversion of mathematical expressions to LaTeX. This drastically reduces the data engineering burden required before tokenization and model training.
+  - Mitigation: The datasets sourced via Common Pile v0.1 have already undergone significant preprocessing, including language identification, personally identifiable information (PII) redaction, document-level fuzzy deduplication, and the conversion of mathematical expressions to LaTeX. This drastically reduces the data engineering burden required before tokenization and model training.
