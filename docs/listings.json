@@ -2,7 +2,8 @@
   {
     "listing": "/exec_summary.html",
     "items": [
-      "/adrs/adr-01.html"
+      "/adrs/adr-01.html",
+      "/adrs/adr-02.html"
     ]
   },
   {

@@ -1,5 +1,5 @@
 ---
-title: "Architecture Decision Record (ADR) 001"
+title: "Architecture Decision Record (ADR) 001- Local-First Architecture"
 format: html
 ---
 
