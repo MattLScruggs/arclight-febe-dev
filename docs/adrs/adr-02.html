@@ -182,7 +182,7 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="decision" class="level3">
 <h3 class="anchored" data-anchor-id="decision">2. Decision</h3>
-<p>We will pretrain the Arclight-FEBE core engine using a highly filtered subset of “The Common Pile v0.1.pdf”, an 8TB dataset composed exclusively of public domain and openly licensed text.</p>
+<p>We will pretrain the Arclight-FEBE core engine using a highly filtered subset of Common Pile v0.1, an 8TB dataset composed exclusively of public domain and openly licensed text.</p>
 <p>Specifically, the pretraining mixture will be restricted to the following ten domain-dense and foundational sources derived from the common-pile project:</p>
 <ul>
 <li><p><strong>Scientific &amp; Medical Text:</strong> PubMed, arXiv, and Wikipedia extracts.</p></li>
@@ -207,7 +207,7 @@ ul.task-list li input[type="checkbox"] {
 </ul></li>
 <li><p><strong>Consequence: Data Processing Overhead for Specialized Formats.</strong> Extracting clean text from legacy PDFs, scientific LaTeX files (arXiv), and raw encyclopedic dumps (Wikipedia) introduces complex extraction challenges, such as parsing column layouts, stripping MediaWiki markdown, and removing structural boilerplate.</p>
 <ul>
-<li>Mitigation: The datasets sourced via “The Common Pile v0.1.pdf” have already undergone significant preprocessing, including language identification, personally identifiable information (PII) redaction, document-level fuzzy deduplication, and the conversion of mathematical expressions to LaTeX. This drastically reduces the data engineering burden required before tokenization and model training.</li>
+<li>Mitigation: The datasets sourced via Common Pile v0.1 have already undergone significant preprocessing, including language identification, personally identifiable information (PII) redaction, document-level fuzzy deduplication, and the conversion of mathematical expressions to LaTeX. This drastically reduces the data engineering burden required before tokenization and model training.</li>
 </ul></li>
 </ul>
 
