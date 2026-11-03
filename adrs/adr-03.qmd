@@ -1,0 +1,28 @@
+---
+title: "Architecture Decision Record (ADR) 003- Training From Scratch"
+format: html
+---
+
+## End-to-End Pretraining and Custom Tokenization
+
+### 1. Context and problem statement
+
+To support field epidemiologists in resource-constrained, disconnected environments, the Arclight architecture must run entirely offline on standard edge hardware. This operational reality imposes a strict hardware limit, capping the model size at under 3 billion parameters. At this constrained scale, optimizing the model's capacity and processing efficiency for complex domain-specific public health data is critical for success.
+
+### 2. Decision
+
+We will train a custom Small Language Model (SLM) from scratch, rather than continually pretraining or fine-tuning an existing open-weights model, to enable the integration of a bespoke, domain-specific Byte-Pair Encoding (BPE) tokenizer.
+
+### 3. Rationale
+
+- **The Tokenization Penalty of Existing Models:** Standard off-the-shelf tokenizers are optimized for general internet text to minimize byte lengths across broad topics. When encountering specialized epidemiological or clinical terminology, these generic tokenizers cause severe subword fragmentation. This fragmentation artificially inflates the context window and forces a small model to waste valuable self-attention steps simply reconstructing basic nomenclature rather than reasoning over patient context.
+
+- **The Fine-Tuning Trap:** If we simply fine-tune an existing base model, we are mathematically forced to use its original tokenizer. Altering or re-initializing the embeddings of an already-trained model misaligns its internal coordinate space and destroys its pretrained representations. By fine-tuning, we inherit the context bloat and processing inefficiency of the generic tokenizer, which negatively impacts inference speed and memory footprint on edge devices.
+
+- **The Forced Path:** Building a bespoke BPE tokenizer tailored strictly to clinical text yields drastically higher semantic compression and restricts the embedding table size, freeing up over 95% of the model's capacity for the actual transformer layers. Because introducing a custom domain tokenizer fundamentally invalidates the weight matrices of existing models, the requirement for efficient tokenization explicitly forces the choice to develop and train the architecture from scratch.
+
+### 4. Consequences and Mitigation
+
+- **Consequence:** Training a model from scratch introduces the risk of the model failing to learn baseline linguistic structures, as well as the risk of requiring unachievable amounts of compute and data.
+
+  - Mitigation: We will control these risks and downsides through strict data and architectural discipline. To prevent the model from wasting parameters on irrelevant noise, we will ensure high-quality, clean training data using a high-density synthetic domain corpus (the "Textbook Quality" paradigm). Additionally, we will utilize a highly capable architecture sized at approximately 1 billion parameters, which balances the representational power needed for semantic extraction with the ability to train iteratively and cost-effectively.

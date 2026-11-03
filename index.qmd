@@ -3,8 +3,8 @@ title: "Hi, I'm Matt Scruggs, MPH, MSDA"
 pagetitle: "Matt Scruggs, Data Scientist"
 image: images/profile_photo_bw.jpg
 about:
-  template: jolla
-  image-width: 25%
+  template: trestles
+  image-width: 100%
   image-shape: rectangle
 ---
 

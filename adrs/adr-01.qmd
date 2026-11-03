@@ -23,7 +23,7 @@ We will implement a local-first, edge-deployed architecture utilizing a sub-3B p
 
 - **Cost Containment:** By avoiding commercial API calls, the enterprise avoids runaway inference costs. The compute burden is shifted to existing edge hardware (e.g., standard laptops), reducing ongoing operational expenditures to zero.
 
-- **Right-Sizing Compute:** Triage data extraction is a bounded, specific task. Deploying a massive frontier model (e.g., 70B+ parameters) is architecturally bloated for this use case. A 1.5B to 3B parameter model provides sufficient linguistic capability while fitting comfortably within the memory constraints of a standard CPU/RAM footprint.
+- **Right-Sizing Compute:** Triage data extraction is a bounded, specific task. Deploying a massive frontier model (e.g., 70B+ parameters) is architecturally bloated for this use case. A 1B parameter model provides sufficient linguistic capability while fitting comfortably within the memory constraints of a standard CPU/RAM footprint.
 
 ### 4. Consequences and Mitigations
 
