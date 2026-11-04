@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>adr-03</title>
+<title>Architecture Decision Record (ADR) 003- Training From Scratch</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -141,7 +141,7 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#architecture-decision-record-end-to-end-pretraining-and-custom-tokenization-for-edge-deployment" id="toc-architecture-decision-record-end-to-end-pretraining-and-custom-tokenization-for-edge-deployment" class="nav-link active" data-scroll-target="#architecture-decision-record-end-to-end-pretraining-and-custom-tokenization-for-edge-deployment">Architecture Decision Record: End-to-End Pretraining and Custom Tokenization for Edge Deployment</a>
+  <li><a href="#end-to-end-pretraining-and-custom-tokenization" id="toc-end-to-end-pretraining-and-custom-tokenization" class="nav-link active" data-scroll-target="#end-to-end-pretraining-and-custom-tokenization">End-to-End Pretraining and Custom Tokenization</a>
   <ul class="collapse">
   <li><a href="#context-and-problem-statement" id="toc-context-and-problem-statement" class="nav-link" data-scroll-target="#context-and-problem-statement">1. Context and problem statement</a></li>
   <li><a href="#decision" id="toc-decision" class="nav-link" data-scroll-target="#decision">2. Decision</a></li>
@@ -156,7 +156,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">adr-03</h1>
+<h1 class="title">Architecture Decision Record (ADR) 003- Training From Scratch</h1>
 </div>
 
 
@@ -173,8 +173,8 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="architecture-decision-record-end-to-end-pretraining-and-custom-tokenization-for-edge-deployment" class="level2">
-<h2 class="anchored" data-anchor-id="architecture-decision-record-end-to-end-pretraining-and-custom-tokenization-for-edge-deployment">Architecture Decision Record: End-to-End Pretraining and Custom Tokenization for Edge Deployment</h2>
+<section id="end-to-end-pretraining-and-custom-tokenization" class="level2">
+<h2 class="anchored" data-anchor-id="end-to-end-pretraining-and-custom-tokenization">End-to-End Pretraining and Custom Tokenization</h2>
 <section id="context-and-problem-statement" class="level3">
 <h3 class="anchored" data-anchor-id="context-and-problem-statement">1. Context and problem statement</h3>
 <p>To support field epidemiologists in resource-constrained, disconnected environments, the Arclight architecture must run entirely offline on standard edge hardware. This operational reality imposes a strict hardware limit, capping the model size at under 3 billion parameters. At this constrained scale, optimizing the model’s capacity and processing efficiency for complex domain-specific public health data is critical for success.</p>
