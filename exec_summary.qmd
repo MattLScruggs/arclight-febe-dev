@@ -9,29 +9,67 @@ listing:
   type: table
 ---
 
-## Operational Challenges in Public Health
+## The Manifesto
+
+### Operational Challenges in Public Health
 
 Local health departments operate on the front lines of disease surveillance and outbreak response, yet they routinely face severe resource constraints. Persistent underfunding and staffing shortages make deploying complex cloud infrastructure, managing heavy pipelines, or maintaining continuous subscription APIs practical impossibilities.
 
 Furthermore, field epidemiologists work in harsh environments where connectivity is unreliable. Data collected during investigations is complex, highly contextual, and contains sensitive Protected Health Information (PHI). Standard consumer AI models carry severe data privacy risks and offer little defense against hallucinations, risking misallocated resources and public mistrust.
 
-## Bridging the Gap: On-Device AI
+### Bridging the Gap: On-Device AI
 
 Critical public health interventions rarely occur in climate-controlled offices; they unfold in rural clinics, border settlements, and post-disaster zones. Because modern tools rely heavily on the cloud, a dropped connection instantly freezes applications, forcing responders back to manual paper forms at the exact moment rapid data processing is vital.
 
 To solve this, public health tech must deploy local-first, quantized machine learning. By utilizing small language models (\<3B parameters) optimized for standard laptops and tablets, applications become fully self-sufficient. These specialized models extract symptoms, timelines, and risk factors from messy notes directly on-device without calling external servers.
 
-## The Arclight Solution: On-Device AI for Frontline Response
+Running inference locally establishes a zero-trust privacy perimeter. Because sensitive patient details never leave the physical hard drive, organizations overcome major regulatory hurdles, avoid recurring server costs, and maintain complete data residency by default. Ultimately, sustainable AI for public health must treat internet connectivity as an unpredictable variable rather than a core requirement—ensuring field operations remain resilient against any crisis.
+
+### The Arclight-FEBE Solution: On-Device AI for Frontline Response
 
 Designed explicitly for edge deployment, the Arclight architecture runs natively on handheld devices. By eliminating external network dependencies, it removes cloud setup overhead, API subscription costs, and data leakage risks. Despite a compact footprint, Arclight ingests unstructured field notes, images, and voice recordings, outputting tightly structured formats for dependable analytical use in any off-grid environment.
 
-## Introducing Arclight-FEBE
-
 The Arclight- Field Epidemiology By Epidemiologists (FEBE) project serves as an open-source proof of concept demonstrating Arclight in practice. FEBE provides an accessible framework for academic and research institutions worldwide to build, adapt, and deploy custom epidemiological tools directly into field hands.
 
-## Zero-Trust AI
+------------------------------------------------------------------------
 
-Running inference locally establishes a zero-trust privacy perimeter. Because sensitive patient details never leave the physical hard drive, organizations overcome major regulatory hurdles, avoid recurring server costs, and maintain complete data residency by default. Ultimately, sustainable AI for public health must treat internet connectivity as an unpredictable variable rather than a core requirement—ensuring field operations remain resilient against any crisis.
+## The Technical Roadmap
+
+#### From Philosophy to Execution
+
+To empirically determine the minimum compute footprint required for this task, the build begins with a highly constrained 124-million parameter baseline model rather than a bloated default architecture. By hardening an evaluation pipeline first, we can test this baseline's semantic reasoning and structured extraction capabilities directly.
+
+Subsequent milestones—whether fine-tuning the 124m engine for specific end-uses or executing a ground-up rebuild scaled to 350-million parameters—are treated as deliberate, data-driven architectural decisions rather than assumptions. This roadmap serves as a step-by-step validation of a zero-trust, edge-native framework for field epidemiology.
+
+### The Strategic Objective:
+
+To empirically determine the minimum viable compute footprint required for offline epidemiological extraction and retrieval. This project follows a strict scale-up-as-needed methodology, anchoring all architectural decisions to a hardened evaluation pipeline.
+
+#### Phase 1: The Evaluation Contract (Pipeline Development)
+
+- Before any model weights are initialized, establish the ground-truth evaluation pipeline.
+
+- Define strict metrics for success: token-level Exact Match (EM) for JSON extraction, schema adherence rates, and RAG retrieval accuracy.
+
+#### Phase 2: The 124m Baseline Build
+
+- Train a heavily constrained, slightly over-trained 124-million parameter model from scratch utilizing the custom medical BPE tokenizer.
+
+- Run the model through the Phase 1 evaluation pipeline to establish baseline semantic reasoning and structural extraction metrics.
+
+#### Phase 3: The Application Harness (Experimentation)
+
+- Prompt Engineering: Test the 124m model's zero-shot and few-shot compliance using structured decoding masks.
+
+- Local RAG Integration: Implement a simple offline vector retrieval harness to test if the 124m parameters can process retrieved context without treating it as disruptive noise.
+
+#### Phase 4: Empirical Scaling & Optimization
+
+- Based on the evaluation pipeline results from Phase 3, execute one of two targeted optimizations:
+
+  - Path A (Fine-Tuning): If the 124m model demonstrates sufficient baseline reasoning but lacks structural consistency, fine-tune the weights for the specific end-use extraction task.
+
+  - Path B (Architectural Scaling): If the 124m model hits a "factual emptiness" ceiling or fails multi-hop RAG reasoning, execute a ground-up rebuild scaled to the \~350-million parameter inflection point to unlock necessary algorithmic expressivity.
 
 ------------------------------------------------------------------------
 
