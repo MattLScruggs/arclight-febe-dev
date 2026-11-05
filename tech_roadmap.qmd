@@ -1,6 +1,6 @@
 ---
 title: "The Technical Roadmap"
-subtitle: "Outline and Notebooks"
+subtitle: "Overview and Notebooks"
 format: 
   html:
     toc: true
@@ -9,9 +9,7 @@ listing:
   type: table
 ---
 
-## The Technical Roadmap
-
-#### From Philosophy to Execution
+## From Philosophy to Execution
 
 To empirically determine the minimum compute footprint required for this task, the build begins with a highly constrained 124-million parameter baseline model rather than a bloated default architecture. By hardening an evaluation pipeline first, we can test this baseline's semantic reasoning and structured extraction capabilities directly.
 
