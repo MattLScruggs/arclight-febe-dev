@@ -207,11 +207,7 @@ window.Quarto = {
   <li><a href="#bridging-the-gap-on-device-ai" id="toc-bridging-the-gap-on-device-ai" class="nav-link" data-scroll-target="#bridging-the-gap-on-device-ai">Bridging the Gap: On-Device AI</a></li>
   <li><a href="#the-arclight-febe-solution-on-device-ai-for-frontline-response" id="toc-the-arclight-febe-solution-on-device-ai-for-frontline-response" class="nav-link" data-scroll-target="#the-arclight-febe-solution-on-device-ai-for-frontline-response">The Arclight-FEBE Solution: On-Device AI for Frontline Response</a></li>
   </ul></li>
-  <li><a href="#the-technical-roadmap" id="toc-the-technical-roadmap" class="nav-link" data-scroll-target="#the-technical-roadmap">The Technical Roadmap</a>
-  <ul class="collapse">
-  <li><a href="#the-strategic-objective" id="toc-the-strategic-objective" class="nav-link" data-scroll-target="#the-strategic-objective">The Strategic Objective:</a></li>
-  </ul></li>
-  <li><a href="#the-engineering-log" id="toc-the-engineering-log" class="nav-link" data-scroll-target="#the-engineering-log">The Engineering Log</a></li>
+  <li><a href="#engineering-decision-points" id="toc-engineering-decision-points" class="nav-link" data-scroll-target="#engineering-decision-points">Engineering Decision Points</a></li>
   </ul>
 </nav>
     </div>
@@ -258,52 +254,8 @@ window.Quarto = {
 <hr>
 </section>
 </section>
-<section id="the-technical-roadmap" class="level2">
-<h2 class="anchored" data-anchor-id="the-technical-roadmap">The Technical Roadmap</h2>
-<section id="from-philosophy-to-execution" class="level4">
-<h4 class="anchored" data-anchor-id="from-philosophy-to-execution">From Philosophy to Execution</h4>
-<p>To empirically determine the minimum compute footprint required for this task, the build begins with a highly constrained 124-million parameter baseline model rather than a bloated default architecture. By hardening an evaluation pipeline first, we can test this baseline’s semantic reasoning and structured extraction capabilities directly.</p>
-<p>Subsequent milestones—whether fine-tuning the 124m engine for specific end-uses or executing a ground-up rebuild scaled to 350-million parameters—are treated as deliberate, data-driven architectural decisions rather than assumptions. This roadmap serves as a step-by-step validation of a zero-trust, edge-native framework for field epidemiology.</p>
-</section>
-<section id="the-strategic-objective" class="level3">
-<h3 class="anchored" data-anchor-id="the-strategic-objective">The Strategic Objective:</h3>
-<p>To empirically determine the minimum viable compute footprint required for offline epidemiological extraction and retrieval. This project follows a strict scale-up-as-needed methodology, anchoring all architectural decisions to a hardened evaluation pipeline.</p>
-<section id="phase-1-the-evaluation-contract-pipeline-development" class="level4">
-<h4 class="anchored" data-anchor-id="phase-1-the-evaluation-contract-pipeline-development">Phase 1: The Evaluation Contract (Pipeline Development)</h4>
-<ul>
-<li><p>Before any model weights are initialized, establish the ground-truth evaluation pipeline.</p></li>
-<li><p>Define strict metrics for success: token-level Exact Match (EM) for JSON extraction, schema adherence rates, and RAG retrieval accuracy.</p></li>
-</ul>
-</section>
-<section id="phase-2-the-124m-baseline-build" class="level4">
-<h4 class="anchored" data-anchor-id="phase-2-the-124m-baseline-build">Phase 2: The 124m Baseline Build</h4>
-<ul>
-<li><p>Train a heavily constrained, slightly over-trained 124-million parameter model from scratch utilizing the custom medical BPE tokenizer.</p></li>
-<li><p>Run the model through the Phase 1 evaluation pipeline to establish baseline semantic reasoning and structural extraction metrics.</p></li>
-</ul>
-</section>
-<section id="phase-3-the-application-harness-experimentation" class="level4">
-<h4 class="anchored" data-anchor-id="phase-3-the-application-harness-experimentation">Phase 3: The Application Harness (Experimentation)</h4>
-<ul>
-<li><p>Prompt Engineering: Test the 124m model’s zero-shot and few-shot compliance using structured decoding masks.</p></li>
-<li><p>Local RAG Integration: Implement a simple offline vector retrieval harness to test if the 124m parameters can process retrieved context without treating it as disruptive noise.</p></li>
-</ul>
-</section>
-<section id="phase-4-empirical-scaling-optimization" class="level4">
-<h4 class="anchored" data-anchor-id="phase-4-empirical-scaling-optimization">Phase 4: Empirical Scaling &amp; Optimization</h4>
-<ul>
-<li><p>Based on the evaluation pipeline results from Phase 3, execute one of two targeted optimizations:</p>
-<ul>
-<li><p>Path A (Fine-Tuning): If the 124m model demonstrates sufficient baseline reasoning but lacks structural consistency, fine-tune the weights for the specific end-use extraction task.</p></li>
-<li><p>Path B (Architectural Scaling): If the 124m model hits a “factual emptiness” ceiling or fails multi-hop RAG reasoning, execute a ground-up rebuild scaled to the ~350-million parameter inflection point to unlock necessary algorithmic expressivity.</p></li>
-</ul></li>
-</ul>
-<hr>
-</section>
-</section>
-</section>
-<section id="the-engineering-log" class="level2">
-<h2 class="anchored" data-anchor-id="the-engineering-log">The Engineering Log</h2>
+<section id="engineering-decision-points" class="level2">
+<h2 class="anchored" data-anchor-id="engineering-decision-points">Engineering Decision Points</h2>
 
 
 
@@ -345,7 +297,7 @@ window.Quarto = {
 </thead>
 <tbody class="list">
 
-<tr data-index="0" data-listing-file-modified-sort="1793721744413" data-listing-reading-time-sort="2" data-listing-word-count-sort="355" data-listing-title-sort="Architecture Decision Record (ADR) 001- Local-First Architecture" data-listing-filename-sort="adr-01.qmd">
+<tr data-index="0" data-listing-file-modified-sort="1793897876504" data-listing-reading-time-sort="2" data-listing-word-count-sort="355" data-listing-title-sort="Architecture Decision Record (ADR) 001- Local-First Architecture" data-listing-filename-sort="adr-01.qmd">
 <td>
 <a href="./adrs/adr-01.html" class="title listing-title">Architecture Decision Record (ADR) 001- Local-First Architecture</a>
 </td>
@@ -355,7 +307,7 @@ window.Quarto = {
 
 </tr>
 
-<tr data-index="1" data-listing-file-modified-sort="1793722232369" data-listing-reading-time-sort="3" data-listing-word-count-sort="570" data-listing-title-sort="Architecture Decision Record (ADR) 002- Dataset Engineering" data-listing-filename-sort="adr-02.qmd">
+<tr data-index="1" data-listing-file-modified-sort="1793897876504" data-listing-reading-time-sort="3" data-listing-word-count-sort="570" data-listing-title-sort="Architecture Decision Record (ADR) 002- Dataset Engineering" data-listing-filename-sort="adr-02.qmd">
 <td>
 <a href="./adrs/adr-02.html" class="title listing-title">Architecture Decision Record (ADR) 002- Dataset Engineering</a>
 </td>
@@ -365,7 +317,7 @@ window.Quarto = {
 
 </tr>
 
-<tr data-index="2" data-listing-file-modified-sort="1793722230137" data-listing-reading-time-sort="3" data-listing-word-count-sort="402" data-listing-title-sort="Architecture Decision Record (ADR) 003- Training From Scratch" data-listing-filename-sort="adr-03.qmd">
+<tr data-index="2" data-listing-file-modified-sort="1793897876504" data-listing-reading-time-sort="3" data-listing-word-count-sort="402" data-listing-title-sort="Architecture Decision Record (ADR) 003- Training From Scratch" data-listing-filename-sort="adr-03.qmd">
 <td>
 <a href="./adrs/adr-03.html" class="title listing-title">Architecture Decision Record (ADR) 003- Training From Scratch</a>
 </td>

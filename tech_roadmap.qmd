@@ -1,0 +1,52 @@
+---
+title: "The Technical Roadmap"
+subtitle: "Outline and Notebooks"
+format: 
+  html:
+    toc: true
+listing:
+  contents: notebooks
+  type: table
+---
+
+## The Technical Roadmap
+
+#### From Philosophy to Execution
+
+To empirically determine the minimum compute footprint required for this task, the build begins with a highly constrained 124-million parameter baseline model rather than a bloated default architecture. By hardening an evaluation pipeline first, we can test this baseline's semantic reasoning and structured extraction capabilities directly.
+
+Subsequent milestones—whether fine-tuning the 124m engine for specific end-uses or executing a ground-up rebuild scaled to 350-million parameters—are treated as deliberate, data-driven architectural decisions rather than assumptions. This roadmap serves as a step-by-step validation of a zero-trust, edge-native framework for field epidemiology.
+
+### The Strategic Objective:
+
+To empirically determine the minimum viable compute footprint required for offline epidemiological extraction and retrieval. This project follows a strict scale-up-as-needed methodology, anchoring all architectural decisions to a hardened evaluation pipeline.
+
+#### Phase 1: The Evaluation Contract (Pipeline Development)
+
+- Before any model weights are initialized, establish the ground-truth evaluation pipeline.
+
+- Define strict metrics for success: token-level Exact Match (EM) for JSON extraction, schema adherence rates, and RAG retrieval accuracy.
+
+#### Phase 2: The 124m Baseline Build
+
+- Train a heavily constrained, slightly over-trained 124-million parameter model from scratch utilizing the custom medical BPE tokenizer.
+
+- Run the model through the Phase 1 evaluation pipeline to establish baseline semantic reasoning and structural extraction metrics.
+
+#### Phase 3: The Application Harness (Experimentation)
+
+- Prompt Engineering: Test the 124m model's zero-shot and few-shot compliance using structured decoding masks.
+
+- Local RAG Integration: Implement a simple offline vector retrieval harness to test if the 124m parameters can process retrieved context without treating it as disruptive noise.
+
+#### Phase 4: Empirical Scaling & Optimization
+
+- Based on the evaluation pipeline results from Phase 3, execute one of two targeted optimizations:
+
+  - Path A (Fine-Tuning): If the 124m model demonstrates sufficient baseline reasoning but lacks structural consistency, fine-tune the weights for the specific end-use extraction task.
+
+  - Path B (Architectural Scaling): If the 124m model hits a "factual emptiness" ceiling or fails multi-hop RAG reasoning, execute a ground-up rebuild scaled to the \~350-million parameter inflection point to unlock necessary algorithmic expressivity.
+
+------------------------------------------------------------------------
+
+## The Notebooks

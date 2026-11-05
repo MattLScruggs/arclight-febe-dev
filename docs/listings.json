@@ -1,7 +1,9 @@
 [
   {
-    "listing": "/blog.html",
-    "items": []
+    "listing": "/tech_roadmap.html",
+    "items": [
+      "/notebooks/BPE_Tokenizer.html"
+    ]
   },
   {
     "listing": "/exec_summary.html",
@@ -10,5 +12,9 @@
       "/adrs/adr-02.html",
       "/adrs/adr-03.html"
     ]
+  },
+  {
+    "listing": "/blog.html",
+    "items": []
   }
 ]
