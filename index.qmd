@@ -34,4 +34,4 @@ Cutting-edge foundation models running on massive data centers are financially a
 
 [View the Arclight-FEBE documentation](/exec_summary.qmd).
 
-[Check out the code](https://github.com/MattLScruggs/arclight-febe-dev/tree/main/notebooks)
+[Check out the development roadmap](https://github.com/MattLScruggs/arclight-febe-dev/tree/main/notebooks)

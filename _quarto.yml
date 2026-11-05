@@ -13,8 +13,10 @@ website:
         href: index.qmd
       - text: Essays and Articles
         href: local_ai.qmd
-      - text: Arclight-FEBE v1.0 Model Documentation
+      - text: Model Documentation
         href: exec_summary.qmd
+      - text: Technical Roadmap
+        href: tech_roadmap.qmd
     right:
       - text: About Me
         href: about.qmd
