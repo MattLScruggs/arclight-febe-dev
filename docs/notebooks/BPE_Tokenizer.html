@@ -180,7 +180,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#builds-custom-tokenizer-using-subset-of-epidemiological-data" id="toc-builds-custom-tokenizer-using-subset-of-epidemiological-data" class="nav-link active" data-scroll-target="#builds-custom-tokenizer-using-subset-of-epidemiological-data">Builds custom tokenizer using subset of epidemiological data</a></li>
+  <li><a href="#builds-custom-tokenizer-using-subset-of-epidemiological-data" id="toc-builds-custom-tokenizer-using-subset-of-epidemiological-data" class="nav-link active" data-scroll-target="#builds-custom-tokenizer-using-subset-of-epidemiological-data">Builds custom tokenizer using subset of epidemiological data</a>
+  <ul class="collapse">
+  <li><a href="#unit-testing" id="toc-unit-testing" class="nav-link" data-scroll-target="#unit-testing">Unit Testing</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -190,39 +193,622 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p><a href="https://colab.research.google.com/github/MattLScruggs/arclight-site/blob/main/notebooks/BPE_Tokenizer.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a></p>
+<p><a href="https://colab.research.google.com/github/MattLScruggs/arclight-febe-dev/blob/main/notebooks/BPE_Tokenizer.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a></p>
 <section id="builds-custom-tokenizer-using-subset-of-epidemiological-data" class="level1">
 <h1>Builds custom tokenizer using subset of epidemiological data</h1>
-<div id="cell-2" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tokenizers <span class="im">import</span> Tokenizer</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tokenizers.models <span class="im">import</span> BPE</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tokenizers.trainers <span class="im">import</span> BpeTrainer</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tokenizers.pre_tokenizers <span class="im">import</span> ByteLevel</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tokenizers.processors <span class="im">import</span> ByteLevel <span class="im">as</span> ByteLevelProcessor</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Import Libraries</p>
+<div id="cell-3" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter, deque</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> functools <span class="im">import</span> lru_cache</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="cell-3" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> Tokenizer(BPE())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Mount Google Drive</p>
+<div id="cell-5" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="ec28772e-2761-4fc1-80bc-c95a6d7c8bff">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> google.colab <span class="im">import</span> drive</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>drive.mount(<span class="st">'/drive'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Mounted at /drive</code></pre>
 </div>
-<div id="cell-4" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>tokenizer.pre_tokenizer <span class="op">=</span> ByteLevel(add_prefix_space<span class="op">=</span><span class="va">False</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="cell-5" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>trainer <span class="op">=</span> BpeTrainer(</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    vocab_size<span class="op">=</span><span class="dv">32768</span>,</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    special_tokens<span class="op">=</span>[</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"&lt;|end_of_text|&gt;"</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    ],</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    show_progress<span class="op">=</span><span class="va">True</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div id="cell-6" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>corpus_files <span class="op">=</span> [<span class="st">"mmwr_sample.txt"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
+<p>Define BPE Class</p>
 <div id="cell-7" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>tokenizer.train(corpus_files, trainer)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BPETokenizerSimple:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.vocab <span class="op">=</span> {}</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.inverse_vocab <span class="op">=</span> {}</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.bpe_merges <span class="op">=</span> {}</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> train(<span class="va">self</span>, text, vocab_size, allowed_special<span class="op">=</span>{<span class="st">"&lt;|endoftext|&gt;"</span>}):</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">            text (str): The training text.</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">            vocab_size (int): The desired vocabulary size.</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">            allowed_special (set): A set of special tokens to include.</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        tokens <span class="op">=</span> <span class="va">self</span>.pretokenize_text(text)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        unique_chars <span class="op">=</span> [<span class="bu">chr</span>(i) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">256</span>)]</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        unique_chars.extend(</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>            char <span class="cf">for</span> char <span class="kw">in</span> <span class="bu">sorted</span>({char <span class="cf">for</span> token <span class="kw">in</span> tokens <span class="cf">for</span> char <span class="kw">in</span> token})</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> char <span class="kw">not</span> <span class="kw">in</span> unique_chars</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="st">"Ġ"</span> <span class="kw">not</span> <span class="kw">in</span> unique_chars:</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>            unique_chars.append(<span class="st">"Ġ"</span>)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.vocab <span class="op">=</span> {i: char <span class="cf">for</span> i, char <span class="kw">in</span> <span class="bu">enumerate</span>(unique_chars)}</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.inverse_vocab <span class="op">=</span> {char: i <span class="cf">for</span> i, char <span class="kw">in</span> <span class="va">self</span>.vocab.items()}</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> allowed_special:</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> token <span class="kw">in</span> allowed_special:</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> token <span class="kw">not</span> <span class="kw">in</span> <span class="va">self</span>.inverse_vocab:</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>                    new_id <span class="op">=</span> <span class="bu">len</span>(<span class="va">self</span>.vocab)</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>                    <span class="va">self</span>.vocab[new_id] <span class="op">=</span> token</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>                    <span class="va">self</span>.inverse_vocab[token] <span class="op">=</span> new_id</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        token_id_sequences <span class="op">=</span> [</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>            [<span class="va">self</span>.inverse_vocab[char] <span class="cf">for</span> char <span class="kw">in</span> token]</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> token <span class="kw">in</span> tokens</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> new_id <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(<span class="va">self</span>.vocab), vocab_size):</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>            pair_id <span class="op">=</span> <span class="va">self</span>.find_freq_pair(token_id_sequences, mode<span class="op">=</span><span class="st">"most"</span>)</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> pair_id <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>            token_id_sequences <span class="op">=</span> <span class="va">self</span>.replace_pair(token_id_sequences, pair_id, new_id)</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.bpe_merges[pair_id] <span class="op">=</span> new_id</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (p0, p1), new_id <span class="kw">in</span> <span class="va">self</span>.bpe_merges.items():</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>            merged_token <span class="op">=</span> <span class="va">self</span>.vocab[p0] <span class="op">+</span> <span class="va">self</span>.vocab[p1]</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.vocab[new_id] <span class="op">=</span> merged_token</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.inverse_vocab[merged_token] <span class="op">=</span> new_id</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> encode(<span class="va">self</span>, text, allowed_special<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a><span class="co">            text (str): The input text to encode.</span></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a><span class="co">            allowed_special (set or None): Special tokens to allow passthrough. If None, special handling is disabled.</span></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>        specials_in_vocab <span class="op">=</span> [</span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>            tok <span class="cf">for</span> tok <span class="kw">in</span> <span class="va">self</span>.inverse_vocab</span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> tok.startswith(<span class="st">"&lt;|"</span>) <span class="kw">and</span> tok.endswith(<span class="st">"|&gt;"</span>)</span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> allowed_special <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>            disallowed <span class="op">=</span> [tok <span class="cf">for</span> tok <span class="kw">in</span> specials_in_vocab <span class="cf">if</span> tok <span class="kw">in</span> text]</span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> disallowed:</span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>                <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f"Disallowed special tokens encountered in text: </span><span class="sc">{</span>disallowed<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>            disallowed <span class="op">=</span> [tok <span class="cf">for</span> tok <span class="kw">in</span> specials_in_vocab <span class="cf">if</span> tok <span class="kw">in</span> text <span class="kw">and</span> tok <span class="kw">not</span> <span class="kw">in</span> allowed_special]</span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> disallowed:</span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>                <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f"Disallowed special tokens encountered in text: </span><span class="sc">{</span>disallowed<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>        token_ids <span class="op">=</span> []</span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> allowed_special <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> <span class="bu">len</span>(allowed_special) <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>            special_pattern <span class="op">=</span> <span class="st">"("</span> <span class="op">+</span> <span class="st">"|"</span>.join(</span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>                re.escape(tok) <span class="cf">for</span> tok <span class="kw">in</span> <span class="bu">sorted</span>(allowed_special, key<span class="op">=</span><span class="bu">len</span>, reverse<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>            ) <span class="op">+</span> <span class="st">")"</span></span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>            last_index <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> match <span class="kw">in</span> re.finditer(special_pattern, text):</span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>                prefix <span class="op">=</span> text[last_index:match.start()]</span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>                token_ids.extend(<span class="va">self</span>.encode(prefix, allowed_special<span class="op">=</span><span class="va">None</span>))  <span class="co"># encode prefix normally</span></span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a>                special_token <span class="op">=</span> match.group(<span class="dv">0</span>)</span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> special_token <span class="kw">in</span> <span class="va">self</span>.inverse_vocab:</span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a>                    token_ids.append(<span class="va">self</span>.inverse_vocab[special_token])</span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a>                <span class="cf">else</span>:</span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f"Special token </span><span class="sc">{</span>special_token<span class="sc">}</span><span class="ss"> not found in vocabulary."</span>)</span>
+<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a>                last_index <span class="op">=</span> match.end()</span>
+<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a>            text <span class="op">=</span> text[last_index:]</span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a>            disallowed <span class="op">=</span> [</span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a>                tok <span class="cf">for</span> tok <span class="kw">in</span> <span class="va">self</span>.inverse_vocab</span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> tok.startswith(<span class="st">"&lt;|"</span>) <span class="kw">and</span> tok.endswith(<span class="st">"|&gt;"</span>) <span class="kw">and</span> tok <span class="kw">in</span> text <span class="kw">and</span> tok <span class="kw">not</span> <span class="kw">in</span> allowed_special</span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>            ]</span>
+<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> disallowed:</span>
+<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a>                <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f"Disallowed special tokens encountered in text: </span><span class="sc">{</span>disallowed<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a>        tokens <span class="op">=</span> <span class="va">self</span>.pretokenize_text(text)</span>
+<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> tok <span class="kw">in</span> tokens:</span>
+<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> tok <span class="kw">in</span> <span class="va">self</span>.inverse_vocab:</span>
+<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a>                token_ids.append(<span class="va">self</span>.inverse_vocab[tok])</span>
+<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a>                token_ids.extend(<span class="va">self</span>.tokenize_with_bpe(tok))</span>
+<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> token_ids</span>
+<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> tokenize_with_bpe(<span class="va">self</span>, token):</span>
+<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a><span class="co">            token (str): The token to tokenize.</span></span>
+<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a>        token_ids <span class="op">=</span> [<span class="va">self</span>.inverse_vocab.get(char, <span class="va">None</span>) <span class="cf">for</span> char <span class="kw">in</span> token]</span>
+<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">None</span> <span class="kw">in</span> token_ids:</span>
+<span id="cb4-118"><a href="#cb4-118" aria-hidden="true" tabindex="-1"></a>            missing_chars <span class="op">=</span> [char <span class="cf">for</span> char, tid <span class="kw">in</span> <span class="bu">zip</span>(token, token_ids) <span class="cf">if</span> tid <span class="kw">is</span> <span class="va">None</span>]</span>
+<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f"Characters not found in vocab: </span><span class="sc">{</span>missing_chars<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a>        can_merge <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> can_merge <span class="kw">and</span> <span class="bu">len</span>(token_ids) <span class="op">&gt;</span> <span class="dv">1</span>:</span>
+<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a>            can_merge <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a>            new_tokens <span class="op">=</span> []</span>
+<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a>            i <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a>            <span class="cf">while</span> i <span class="op">&lt;</span> <span class="bu">len</span>(token_ids) <span class="op">-</span> <span class="dv">1</span>:</span>
+<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a>                pair <span class="op">=</span> (token_ids[i], token_ids[i <span class="op">+</span> <span class="dv">1</span>])</span>
+<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> pair <span class="kw">in</span> <span class="va">self</span>.bpe_merges:</span>
+<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a>                    merged_token_id <span class="op">=</span> <span class="va">self</span>.bpe_merges[pair]</span>
+<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a>                    new_tokens.append(merged_token_id)</span>
+<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a>                    i <span class="op">+=</span> <span class="dv">2</span>  <span class="co"># Skip the next token as it's merged</span></span>
+<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a>                    can_merge <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a>                <span class="cf">else</span>:</span>
+<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a>                    new_tokens.append(token_ids[i])</span>
+<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a>                    i <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> i <span class="op">&lt;</span> <span class="bu">len</span>(token_ids):</span>
+<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a>                new_tokens.append(token_ids[i])</span>
+<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a>            token_ids <span class="op">=</span> new_tokens</span>
+<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> token_ids</span>
+<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a>        symbols <span class="op">=</span> [<span class="va">self</span>.vocab[id_num] <span class="cf">for</span> id_num <span class="kw">in</span> token_ids]</span>
+<span id="cb4-143"><a href="#cb4-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-144"><a href="#cb4-144" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb4-145"><a href="#cb4-145" aria-hidden="true" tabindex="-1"></a>            pairs <span class="op">=</span> <span class="bu">set</span>(<span class="bu">zip</span>(symbols, symbols[<span class="dv">1</span>:]))</span>
+<span id="cb4-146"><a href="#cb4-146" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> pairs:</span>
+<span id="cb4-147"><a href="#cb4-147" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="cb4-148"><a href="#cb4-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-149"><a href="#cb4-149" aria-hidden="true" tabindex="-1"></a>            min_rank <span class="op">=</span> <span class="bu">float</span>(<span class="st">"inf"</span>)</span>
+<span id="cb4-150"><a href="#cb4-150" aria-hidden="true" tabindex="-1"></a>            bigram <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb4-151"><a href="#cb4-151" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> p <span class="kw">in</span> pairs:</span>
+<span id="cb4-152"><a href="#cb4-152" aria-hidden="true" tabindex="-1"></a>                r <span class="op">=</span> <span class="va">self</span>.bpe_ranks.get(p, <span class="bu">float</span>(<span class="st">"inf"</span>))</span>
+<span id="cb4-153"><a href="#cb4-153" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> r <span class="op">&lt;</span> min_rank:</span>
+<span id="cb4-154"><a href="#cb4-154" aria-hidden="true" tabindex="-1"></a>                    min_rank <span class="op">=</span> r</span>
+<span id="cb4-155"><a href="#cb4-155" aria-hidden="true" tabindex="-1"></a>                    bigram <span class="op">=</span> p</span>
+<span id="cb4-156"><a href="#cb4-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-157"><a href="#cb4-157" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> bigram <span class="kw">is</span> <span class="va">None</span> <span class="kw">or</span> bigram <span class="kw">not</span> <span class="kw">in</span> <span class="va">self</span>.bpe_ranks:</span>
+<span id="cb4-158"><a href="#cb4-158" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="cb4-159"><a href="#cb4-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-160"><a href="#cb4-160" aria-hidden="true" tabindex="-1"></a>            first, second <span class="op">=</span> bigram</span>
+<span id="cb4-161"><a href="#cb4-161" aria-hidden="true" tabindex="-1"></a>            new_symbols <span class="op">=</span> []</span>
+<span id="cb4-162"><a href="#cb4-162" aria-hidden="true" tabindex="-1"></a>            i <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb4-163"><a href="#cb4-163" aria-hidden="true" tabindex="-1"></a>            <span class="cf">while</span> i <span class="op">&lt;</span> <span class="bu">len</span>(symbols):</span>
+<span id="cb4-164"><a href="#cb4-164" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> i <span class="op">&lt;</span> <span class="bu">len</span>(symbols) <span class="op">-</span> <span class="dv">1</span> <span class="kw">and</span> symbols[i] <span class="op">==</span> first <span class="kw">and</span> symbols[i<span class="op">+</span><span class="dv">1</span>] <span class="op">==</span> second:</span>
+<span id="cb4-165"><a href="#cb4-165" aria-hidden="true" tabindex="-1"></a>                    new_symbols.append(first <span class="op">+</span> second)</span>
+<span id="cb4-166"><a href="#cb4-166" aria-hidden="true" tabindex="-1"></a>                    i <span class="op">+=</span> <span class="dv">2</span></span>
+<span id="cb4-167"><a href="#cb4-167" aria-hidden="true" tabindex="-1"></a>                <span class="cf">else</span>:</span>
+<span id="cb4-168"><a href="#cb4-168" aria-hidden="true" tabindex="-1"></a>                    new_symbols.append(symbols[i])</span>
+<span id="cb4-169"><a href="#cb4-169" aria-hidden="true" tabindex="-1"></a>                    i <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb4-170"><a href="#cb4-170" aria-hidden="true" tabindex="-1"></a>            symbols <span class="op">=</span> new_symbols</span>
+<span id="cb4-171"><a href="#cb4-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-172"><a href="#cb4-172" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">len</span>(symbols) <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="cb4-173"><a href="#cb4-173" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="cb4-174"><a href="#cb4-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-175"><a href="#cb4-175" aria-hidden="true" tabindex="-1"></a>        merged_ids <span class="op">=</span> [<span class="va">self</span>.inverse_vocab[sym] <span class="cf">for</span> sym <span class="kw">in</span> symbols]</span>
+<span id="cb4-176"><a href="#cb4-176" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> merged_ids</span>
+<span id="cb4-177"><a href="#cb4-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-178"><a href="#cb4-178" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> decode(<span class="va">self</span>, token_ids):</span>
+<span id="cb4-179"><a href="#cb4-179" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="cb4-180"><a href="#cb4-180" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="cb4-181"><a href="#cb4-181" aria-hidden="true" tabindex="-1"></a><span class="co">            token_ids (List[int]): The list of token IDs to decode.</span></span>
+<span id="cb4-182"><a href="#cb4-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-183"><a href="#cb4-183" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb4-184"><a href="#cb4-184" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> []</span>
+<span id="cb4-185"><a href="#cb4-185" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> tid <span class="kw">in</span> token_ids:</span>
+<span id="cb4-186"><a href="#cb4-186" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> tid <span class="kw">not</span> <span class="kw">in</span> <span class="va">self</span>.vocab:</span>
+<span id="cb4-187"><a href="#cb4-187" aria-hidden="true" tabindex="-1"></a>                <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f"Token ID </span><span class="sc">{</span>tid<span class="sc">}</span><span class="ss"> not found in vocab."</span>)</span>
+<span id="cb4-188"><a href="#cb4-188" aria-hidden="true" tabindex="-1"></a>            tok <span class="op">=</span> <span class="va">self</span>.vocab[tid]</span>
+<span id="cb4-189"><a href="#cb4-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-190"><a href="#cb4-190" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> tok.startswith(<span class="st">"Ġ"</span>):</span>
+<span id="cb4-191"><a href="#cb4-191" aria-hidden="true" tabindex="-1"></a>                out.append(<span class="st">" "</span> <span class="op">+</span> tok[<span class="dv">1</span>:])</span>
+<span id="cb4-192"><a href="#cb4-192" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb4-193"><a href="#cb4-193" aria-hidden="true" tabindex="-1"></a>                out.append(tok)</span>
+<span id="cb4-194"><a href="#cb4-194" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">""</span>.join(out)</span>
+<span id="cb4-195"><a href="#cb4-195" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-196"><a href="#cb4-196" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> save_vocab_and_merges(<span class="va">self</span>, vocab_path, bpe_merges_path):</span>
+<span id="cb4-197"><a href="#cb4-197" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="cb4-198"><a href="#cb4-198" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="cb4-199"><a href="#cb4-199" aria-hidden="true" tabindex="-1"></a><span class="co">            vocab_path (str): Path to save the vocabulary.</span></span>
+<span id="cb4-200"><a href="#cb4-200" aria-hidden="true" tabindex="-1"></a><span class="co">            bpe_merges_path (str): Path to save the BPE merges.</span></span>
+<span id="cb4-201"><a href="#cb4-201" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb4-202"><a href="#cb4-202" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> <span class="bu">open</span>(vocab_path, <span class="st">"w"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
+<span id="cb4-203"><a href="#cb4-203" aria-hidden="true" tabindex="-1"></a>            json.dump(<span class="va">self</span>.vocab, <span class="bu">file</span>, ensure_ascii<span class="op">=</span><span class="va">False</span>, indent<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb4-204"><a href="#cb4-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-205"><a href="#cb4-205" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> <span class="bu">open</span>(bpe_merges_path, <span class="st">"w"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
+<span id="cb4-206"><a href="#cb4-206" aria-hidden="true" tabindex="-1"></a>            merges_list <span class="op">=</span> [{<span class="st">"pair"</span>: <span class="bu">list</span>(pair), <span class="st">"new_id"</span>: new_id}</span>
+<span id="cb4-207"><a href="#cb4-207" aria-hidden="true" tabindex="-1"></a>                           <span class="cf">for</span> pair, new_id <span class="kw">in</span> <span class="va">self</span>.bpe_merges.items()]</span>
+<span id="cb4-208"><a href="#cb4-208" aria-hidden="true" tabindex="-1"></a>            json.dump(merges_list, <span class="bu">file</span>, ensure_ascii<span class="op">=</span><span class="va">False</span>, indent<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb4-209"><a href="#cb4-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-210"><a href="#cb4-210" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> load_vocab_and_merges(<span class="va">self</span>, vocab_path, bpe_merges_path):</span>
+<span id="cb4-211"><a href="#cb4-211" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="cb4-212"><a href="#cb4-212" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="cb4-213"><a href="#cb4-213" aria-hidden="true" tabindex="-1"></a><span class="co">            vocab_path (str): Path to the vocabulary file.</span></span>
+<span id="cb4-214"><a href="#cb4-214" aria-hidden="true" tabindex="-1"></a><span class="co">            bpe_merges_path (str): Path to the BPE merges file.</span></span>
+<span id="cb4-215"><a href="#cb4-215" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb4-216"><a href="#cb4-216" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> <span class="bu">open</span>(vocab_path, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
+<span id="cb4-217"><a href="#cb4-217" aria-hidden="true" tabindex="-1"></a>            loaded_vocab <span class="op">=</span> json.load(<span class="bu">file</span>)</span>
+<span id="cb4-218"><a href="#cb4-218" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.vocab <span class="op">=</span> {<span class="bu">int</span>(k): v <span class="cf">for</span> k, v <span class="kw">in</span> loaded_vocab.items()}</span>
+<span id="cb4-219"><a href="#cb4-219" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.inverse_vocab <span class="op">=</span> {v: <span class="bu">int</span>(k) <span class="cf">for</span> k, v <span class="kw">in</span> loaded_vocab.items()}</span>
+<span id="cb4-220"><a href="#cb4-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-221"><a href="#cb4-221" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> <span class="bu">open</span>(bpe_merges_path, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
+<span id="cb4-222"><a href="#cb4-222" aria-hidden="true" tabindex="-1"></a>            merges_list <span class="op">=</span> json.load(<span class="bu">file</span>)</span>
+<span id="cb4-223"><a href="#cb4-223" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> merge <span class="kw">in</span> merges_list:</span>
+<span id="cb4-224"><a href="#cb4-224" aria-hidden="true" tabindex="-1"></a>                pair <span class="op">=</span> <span class="bu">tuple</span>(merge[<span class="st">"pair"</span>])</span>
+<span id="cb4-225"><a href="#cb4-225" aria-hidden="true" tabindex="-1"></a>                new_id <span class="op">=</span> merge[<span class="st">"new_id"</span>]</span>
+<span id="cb4-226"><a href="#cb4-226" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.bpe_merges[pair] <span class="op">=</span> new_id</span>
+<span id="cb4-227"><a href="#cb4-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-228"><a href="#cb4-228" aria-hidden="true" tabindex="-1"></a>    <span class="at">@lru_cache</span>(maxsize<span class="op">=</span><span class="va">None</span>)</span>
+<span id="cb4-229"><a href="#cb4-229" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> get_special_token_id(<span class="va">self</span>, token):</span>
+<span id="cb4-230"><a href="#cb4-230" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.inverse_vocab.get(token, <span class="va">None</span>)</span>
+<span id="cb4-231"><a href="#cb4-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-232"><a href="#cb4-232" aria-hidden="true" tabindex="-1"></a>    <span class="at">@staticmethod</span></span>
+<span id="cb4-233"><a href="#cb4-233" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> pretokenize_text(text):</span>
+<span id="cb4-234"><a href="#cb4-234" aria-hidden="true" tabindex="-1"></a>        tokens <span class="op">=</span> []</span>
+<span id="cb4-235"><a href="#cb4-235" aria-hidden="true" tabindex="-1"></a>        parts <span class="op">=</span> re.split(<span class="vs">r'</span><span class="kw">(</span><span class="ch">\r\n</span><span class="cf">|</span><span class="ch">\r</span><span class="cf">|</span><span class="ch">\n</span><span class="kw">)</span><span class="vs">'</span>, text)</span>
+<span id="cb4-236"><a href="#cb4-236" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> part <span class="kw">in</span> parts:</span>
+<span id="cb4-237"><a href="#cb4-237" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> part <span class="op">==</span> <span class="st">""</span>:</span>
+<span id="cb4-238"><a href="#cb4-238" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb4-239"><a href="#cb4-239" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> part <span class="op">==</span> <span class="st">"</span><span class="ch">\r\n</span><span class="st">"</span>:</span>
+<span id="cb4-240"><a href="#cb4-240" aria-hidden="true" tabindex="-1"></a>                tokens.append(<span class="st">"</span><span class="ch">\r</span><span class="st">"</span>)</span>
+<span id="cb4-241"><a href="#cb4-241" aria-hidden="true" tabindex="-1"></a>                tokens.append(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb4-242"><a href="#cb4-242" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb4-243"><a href="#cb4-243" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> part <span class="op">==</span> <span class="st">"</span><span class="ch">\r</span><span class="st">"</span>:</span>
+<span id="cb4-244"><a href="#cb4-244" aria-hidden="true" tabindex="-1"></a>                tokens.append(<span class="st">"</span><span class="ch">\r</span><span class="st">"</span>)</span>
+<span id="cb4-245"><a href="#cb4-245" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb4-246"><a href="#cb4-246" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> part <span class="op">==</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>:</span>
+<span id="cb4-247"><a href="#cb4-247" aria-hidden="true" tabindex="-1"></a>                tokens.append(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb4-248"><a href="#cb4-248" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb4-249"><a href="#cb4-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-250"><a href="#cb4-250" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Normal chunk without line breaks:</span></span>
+<span id="cb4-251"><a href="#cb4-251" aria-hidden="true" tabindex="-1"></a>            <span class="co"># - If spaces precede a word, prefix the first word with 'Ġ' and</span></span>
+<span id="cb4-252"><a href="#cb4-252" aria-hidden="true" tabindex="-1"></a>            <span class="co">#   add standalone 'Ġ' for additional spaces</span></span>
+<span id="cb4-253"><a href="#cb4-253" aria-hidden="true" tabindex="-1"></a>            <span class="co"># - If spaces trail the chunk (e.g., before a newline) add</span></span>
+<span id="cb4-254"><a href="#cb4-254" aria-hidden="true" tabindex="-1"></a>            <span class="co">#   standalone 'Ġ' tokens (tiktoken produces id 220 for 'Ġ')</span></span>
+<span id="cb4-255"><a href="#cb4-255" aria-hidden="true" tabindex="-1"></a>            pending_spaces <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb4-256"><a href="#cb4-256" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> m <span class="kw">in</span> re.finditer(<span class="vs">r'</span><span class="kw">(</span><span class="vs"> </span><span class="op">+</span><span class="kw">)</span><span class="cf">|</span><span class="kw">(</span><span class="dv">\S</span><span class="op">+</span><span class="kw">)</span><span class="vs">'</span>, part):</span>
+<span id="cb4-257"><a href="#cb4-257" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> m.group(<span class="dv">1</span>) <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb4-258"><a href="#cb4-258" aria-hidden="true" tabindex="-1"></a>                    pending_spaces <span class="op">+=</span> <span class="bu">len</span>(m.group(<span class="dv">1</span>))</span>
+<span id="cb4-259"><a href="#cb4-259" aria-hidden="true" tabindex="-1"></a>                <span class="cf">else</span>:</span>
+<span id="cb4-260"><a href="#cb4-260" aria-hidden="true" tabindex="-1"></a>                    word <span class="op">=</span> m.group(<span class="dv">2</span>)</span>
+<span id="cb4-261"><a href="#cb4-261" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> pending_spaces <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb4-262"><a href="#cb4-262" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(pending_spaces <span class="op">-</span> <span class="dv">1</span>):</span>
+<span id="cb4-263"><a href="#cb4-263" aria-hidden="true" tabindex="-1"></a>                            tokens.append(<span class="st">"Ġ"</span>)</span>
+<span id="cb4-264"><a href="#cb4-264" aria-hidden="true" tabindex="-1"></a>                        tokens.append(<span class="st">"Ġ"</span> <span class="op">+</span> word)</span>
+<span id="cb4-265"><a href="#cb4-265" aria-hidden="true" tabindex="-1"></a>                        pending_spaces <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb4-266"><a href="#cb4-266" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">else</span>:</span>
+<span id="cb4-267"><a href="#cb4-267" aria-hidden="true" tabindex="-1"></a>                        tokens.append(word)</span>
+<span id="cb4-268"><a href="#cb4-268" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-269"><a href="#cb4-269" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(pending_spaces):</span>
+<span id="cb4-270"><a href="#cb4-270" aria-hidden="true" tabindex="-1"></a>                tokens.append(<span class="st">"Ġ"</span>)</span>
+<span id="cb4-271"><a href="#cb4-271" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> tokens</span>
+<span id="cb4-272"><a href="#cb4-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-273"><a href="#cb4-273" aria-hidden="true" tabindex="-1"></a>    <span class="at">@staticmethod</span></span>
+<span id="cb4-274"><a href="#cb4-274" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> find_freq_pair(token_id_sequences, mode<span class="op">=</span><span class="st">"most"</span>):</span>
+<span id="cb4-275"><a href="#cb4-275" aria-hidden="true" tabindex="-1"></a>        pairs <span class="op">=</span> Counter(</span>
+<span id="cb4-276"><a href="#cb4-276" aria-hidden="true" tabindex="-1"></a>            pair</span>
+<span id="cb4-277"><a href="#cb4-277" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> token_ids <span class="kw">in</span> token_id_sequences</span>
+<span id="cb4-278"><a href="#cb4-278" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> pair <span class="kw">in</span> <span class="bu">zip</span>(token_ids, token_ids[<span class="dv">1</span>:])</span>
+<span id="cb4-279"><a href="#cb4-279" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb4-280"><a href="#cb4-280" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-281"><a href="#cb4-281" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> pairs:</span>
+<span id="cb4-282"><a href="#cb4-282" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb4-283"><a href="#cb4-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-284"><a href="#cb4-284" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> mode <span class="op">==</span> <span class="st">"most"</span>:</span>
+<span id="cb4-285"><a href="#cb4-285" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="bu">max</span>(pairs.items(), key<span class="op">=</span><span class="kw">lambda</span> x: x[<span class="dv">1</span>])[<span class="dv">0</span>]</span>
+<span id="cb4-286"><a href="#cb4-286" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> mode <span class="op">==</span> <span class="st">"least"</span>:</span>
+<span id="cb4-287"><a href="#cb4-287" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="bu">min</span>(pairs.items(), key<span class="op">=</span><span class="kw">lambda</span> x: x[<span class="dv">1</span>])[<span class="dv">0</span>]</span>
+<span id="cb4-288"><a href="#cb4-288" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb4-289"><a href="#cb4-289" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">"Invalid mode. Choose 'most' or 'least'."</span>)</span>
+<span id="cb4-290"><a href="#cb4-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-291"><a href="#cb4-291" aria-hidden="true" tabindex="-1"></a>    <span class="at">@staticmethod</span></span>
+<span id="cb4-292"><a href="#cb4-292" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> replace_pair(token_id_sequences, pair_id, new_id):</span>
+<span id="cb4-293"><a href="#cb4-293" aria-hidden="true" tabindex="-1"></a>        replaced_sequences <span class="op">=</span> []</span>
+<span id="cb4-294"><a href="#cb4-294" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-295"><a href="#cb4-295" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> token_ids <span class="kw">in</span> token_id_sequences:</span>
+<span id="cb4-296"><a href="#cb4-296" aria-hidden="true" tabindex="-1"></a>            dq <span class="op">=</span> deque(token_ids)</span>
+<span id="cb4-297"><a href="#cb4-297" aria-hidden="true" tabindex="-1"></a>            replaced <span class="op">=</span> []</span>
+<span id="cb4-298"><a href="#cb4-298" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-299"><a href="#cb4-299" aria-hidden="true" tabindex="-1"></a>            <span class="cf">while</span> dq:</span>
+<span id="cb4-300"><a href="#cb4-300" aria-hidden="true" tabindex="-1"></a>                current <span class="op">=</span> dq.popleft()</span>
+<span id="cb4-301"><a href="#cb4-301" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> dq <span class="kw">and</span> (current, dq[<span class="dv">0</span>]) <span class="op">==</span> pair_id:</span>
+<span id="cb4-302"><a href="#cb4-302" aria-hidden="true" tabindex="-1"></a>                    replaced.append(new_id)</span>
+<span id="cb4-303"><a href="#cb4-303" aria-hidden="true" tabindex="-1"></a>                    dq.popleft()</span>
+<span id="cb4-304"><a href="#cb4-304" aria-hidden="true" tabindex="-1"></a>                <span class="cf">else</span>:</span>
+<span id="cb4-305"><a href="#cb4-305" aria-hidden="true" tabindex="-1"></a>                    replaced.append(current)</span>
+<span id="cb4-306"><a href="#cb4-306" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-307"><a href="#cb4-307" aria-hidden="true" tabindex="-1"></a>            replaced_sequences.append(replaced)</span>
+<span id="cb4-308"><a href="#cb4-308" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-309"><a href="#cb4-309" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> replaced_sequences</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="unit-testing" class="level3">
+<h3 class="anchored" data-anchor-id="unit-testing">Unit Testing</h3>
+<p>Import testing JSONL</p>
+<div id="cell-10" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>text_data <span class="op">=</span> []</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"/drive/MyDrive/Arclight/Datasets/JSONL_Output/test.jsonl"</span>, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> line <span class="kw">in</span> <span class="bu">file</span>:</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> line.strip():</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>      data<span class="op">=</span>json.loads(line)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>      text_data.append(data[<span class="st">'text'</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-11" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>flattened_text <span class="op">=</span> <span class="st">"</span><span class="ch">\n\n</span><span class="st">"</span>.join(text_data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-12" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tokenizer<span class="op">=</span>BPETokenizerSimple()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-13" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>tokenizer.train(text<span class="op">=</span>flattened_text, vocab_size<span class="op">=</span><span class="dv">2000</span>, allowed_special<span class="op">=</span>{<span class="st">"&lt;|endoftext|&gt;"</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-14" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>tokenizer.save_vocab_and_merges(vocab_path<span class="op">=</span><span class="st">"/drive/MyDrive/Arclight/Code/Utils/vocab.json"</span>,</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                                bpe_merges_path<span class="op">=</span><span class="st">"/drive/MyDrive/Arclight/Code/Utils/bpe_merges.txt"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Test encoding and decoding on short sample text</p>
+<div id="cell-16" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>test_text<span class="op">=</span> <span class="st">"Epidemiology is the scientific study of the distribution and determinants of health-related states or events in specified populations, and the application of this knowledge to control health problems. &lt;|endoftext|&gt; "</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-17" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="e023892a-89b3-4c81-cd0e-92cedae913a2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>token_ids <span class="op">=</span> tokenizer.encode(test_text, allowed_special<span class="op">=</span> <span class="st">"&lt;|endoftext|&gt;"</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(token_ids)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[69, 112, 105, 100, 101, 109, 105, 111, 108, 111, 1984, 337, 256, 116, 104, 101, 538, 101, 110, 116, 105, 102, 309, 287, 116, 117, 100, 121, 256, 111, 102, 256, 116, 104, 101, 256, 100, 292, 116, 582, 98, 117, 116, 105, 111, 110, 282, 110, 100, 256, 100, 101, 116, 101, 114, 109, 105, 110, 97, 110, 116, 115, 256, 111, 102, 317, 101, 304, 116, 104, 45, 114, 101, 108, 97, 116, 101, 100, 287, 116, 97, 116, 101, 115, 256, 111, 114, 256, 101, 118, 101, 110, 116, 115, 256, 105, 110, 436, 101, 401, 102, 105, 101, 100, 297, 111, 112, 392, 97, 116, 105, 111, 110, 413, 282, 110, 100, 256, 116, 104, 101, 692, 815, 99, 97, 116, 105, 111, 110, 256, 111, 102, 256, 116, 104, 292, 474, 110, 111, 119, 108, 101, 100, 103, 101, 256, 116, 111, 288, 111, 110, 116, 114, 111, 108, 317, 101, 304, 116, 104, 903, 111, 98, 108, 101, 109, 390, 256, 60, 124, 101, 110, 100, 111, 102, 116, 101, 120, 116, 124, 62, 256]</code></pre>
+</div>
+</div>
+<div id="cell-18" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="18e49089-33ea-4399-8446-3120eb719c37">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of characters:"</span>, <span class="bu">len</span>(test_text))</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of token IDs:"</span>, <span class="bu">len</span>(token_ids))</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Compression ratio:"</span>, <span class="bu">len</span>(token_ids) <span class="op">/</span> <span class="bu">len</span>(test_text))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of characters: 215
+Number of token IDs: 182
+Compression ratio: 0.8465116279069768</code></pre>
+</div>
+</div>
+<div id="cell-19" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="201cdf57-6977-45ab-c5ef-d799e0daed74">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> token_id <span class="kw">in</span> token_ids:</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>token_id<span class="sc">}</span><span class="ss"> -&gt; </span><span class="sc">{</span>tokenizer<span class="sc">.</span>decode([token_id])<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>69 -&gt; E
+112 -&gt; p
+105 -&gt; i
+100 -&gt; d
+101 -&gt; e
+109 -&gt; m
+105 -&gt; i
+111 -&gt; o
+108 -&gt; l
+111 -&gt; o
+1984 -&gt; gy
+337 -&gt;  is
+256 -&gt;  
+116 -&gt; t
+104 -&gt; h
+101 -&gt; e
+538 -&gt;  sci
+101 -&gt; e
+110 -&gt; n
+116 -&gt; t
+105 -&gt; i
+102 -&gt; f
+309 -&gt; ic
+287 -&gt;  s
+116 -&gt; t
+117 -&gt; u
+100 -&gt; d
+121 -&gt; y
+256 -&gt;  
+111 -&gt; o
+102 -&gt; f
+256 -&gt;  
+116 -&gt; t
+104 -&gt; h
+101 -&gt; e
+256 -&gt;  
+100 -&gt; d
+292 -&gt; is
+116 -&gt; t
+582 -&gt; ri
+98 -&gt; b
+117 -&gt; u
+116 -&gt; t
+105 -&gt; i
+111 -&gt; o
+110 -&gt; n
+282 -&gt;  a
+110 -&gt; n
+100 -&gt; d
+256 -&gt;  
+100 -&gt; d
+101 -&gt; e
+116 -&gt; t
+101 -&gt; e
+114 -&gt; r
+109 -&gt; m
+105 -&gt; i
+110 -&gt; n
+97 -&gt; a
+110 -&gt; n
+116 -&gt; t
+115 -&gt; s
+256 -&gt;  
+111 -&gt; o
+102 -&gt; f
+317 -&gt;  h
+101 -&gt; e
+304 -&gt; al
+116 -&gt; t
+104 -&gt; h
+45 -&gt; -
+114 -&gt; r
+101 -&gt; e
+108 -&gt; l
+97 -&gt; a
+116 -&gt; t
+101 -&gt; e
+100 -&gt; d
+287 -&gt;  s
+116 -&gt; t
+97 -&gt; a
+116 -&gt; t
+101 -&gt; e
+115 -&gt; s
+256 -&gt;  
+111 -&gt; o
+114 -&gt; r
+256 -&gt;  
+101 -&gt; e
+118 -&gt; v
+101 -&gt; e
+110 -&gt; n
+116 -&gt; t
+115 -&gt; s
+256 -&gt;  
+105 -&gt; i
+110 -&gt; n
+436 -&gt;  sp
+101 -&gt; e
+401 -&gt; ci
+102 -&gt; f
+105 -&gt; i
+101 -&gt; e
+100 -&gt; d
+297 -&gt;  p
+111 -&gt; o
+112 -&gt; p
+392 -&gt; ul
+97 -&gt; a
+116 -&gt; t
+105 -&gt; i
+111 -&gt; o
+110 -&gt; n
+413 -&gt; s,
+282 -&gt;  a
+110 -&gt; n
+100 -&gt; d
+256 -&gt;  
+116 -&gt; t
+104 -&gt; h
+101 -&gt; e
+692 -&gt;  app
+815 -&gt; li
+99 -&gt; c
+97 -&gt; a
+116 -&gt; t
+105 -&gt; i
+111 -&gt; o
+110 -&gt; n
+256 -&gt;  
+111 -&gt; o
+102 -&gt; f
+256 -&gt;  
+116 -&gt; t
+104 -&gt; h
+292 -&gt; is
+474 -&gt;  k
+110 -&gt; n
+111 -&gt; o
+119 -&gt; w
+108 -&gt; l
+101 -&gt; e
+100 -&gt; d
+103 -&gt; g
+101 -&gt; e
+256 -&gt;  
+116 -&gt; t
+111 -&gt; o
+288 -&gt;  c
+111 -&gt; o
+110 -&gt; n
+116 -&gt; t
+114 -&gt; r
+111 -&gt; o
+108 -&gt; l
+317 -&gt;  h
+101 -&gt; e
+304 -&gt; al
+116 -&gt; t
+104 -&gt; h
+903 -&gt;  pr
+111 -&gt; o
+98 -&gt; b
+108 -&gt; l
+101 -&gt; e
+109 -&gt; m
+390 -&gt; s.
+256 -&gt;  
+60 -&gt; &lt;
+124 -&gt; |
+101 -&gt; e
+110 -&gt; n
+100 -&gt; d
+111 -&gt; o
+102 -&gt; f
+116 -&gt; t
+101 -&gt; e
+120 -&gt; x
+116 -&gt; t
+124 -&gt; |
+62 -&gt; &gt;
+256 -&gt;  </code></pre>
+</div>
+</div>
+<p>Test encoding and decoding on much longer text</p>
+<div id="cell-21" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>long_text <span class="op">=</span> []</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"/drive/MyDrive/Arclight/Datasets/JSONL_Output/mmwr_archive.jsonl"</span>, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> line <span class="kw">in</span> <span class="bu">file</span>:</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> line.strip():</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>      data<span class="op">=</span>json.loads(line)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>      long_text.append(data[<span class="st">'text_content'</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-22" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>flattened_long_text <span class="op">=</span> <span class="st">"</span><span class="ch">\n\n</span><span class="st">"</span>.join([text <span class="cf">for</span> text <span class="kw">in</span> long_text <span class="cf">if</span> text <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> <span class="bu">isinstance</span>(text, <span class="bu">str</span>)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-23" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="9ef7a6f1-50b2-4a04-a94b-8cf2b91376b3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>long_test_token_ids <span class="op">=</span> tokenizer.encode(flattened_long_text)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of characters:"</span>, <span class="bu">len</span>(flattened_long_text))</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of token IDs:"</span>, <span class="bu">len</span>(long_test_token_ids))</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Compression ratio:"</span>, <span class="bu">len</span>(long_test_token_ids) <span class="op">/</span> <span class="bu">len</span>(flattened_long_text))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of characters: 116101401
+Number of token IDs: 52380154
+Compression ratio: 0.4511586729259193</code></pre>
+</div>
+</div>
+<p>Testing saving and retrieval</p>
+<div id="cell-25" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>tokenizer2 <span class="op">=</span> BPETokenizerSimple()</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>tokenizer2.load_vocab_and_merges(vocab_path<span class="op">=</span><span class="st">"/drive/MyDrive/Arclight/Code/Utils/vocab.json"</span>,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>                                bpe_merges_path<span class="op">=</span><span class="st">"/drive/MyDrive/Arclight/Code/Utils/bpe_merges.txt"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-26" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="166a22de-e9ec-46cc-c610-5e2d7e8443cc">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tokenizer2.decode(token_ids))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Epidemiology is the scientific study of the distribution and determinants of health-related states or events in specified populations, and the application of this knowledge to control health problems. &lt;|endoftext|&gt; </code></pre>
+</div>
+</div>
+<p>Save notebook as script for later function importing</p>
+<div id="cell-28" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="151e32bd-6c0d-460e-e62b-e6eefdea9e51">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>jupyter nbconvert <span class="op">--</span>to script <span class="st">"/drive/MyDrive/Arclight/Code/BPE_Tokenizer.ipynb"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[NbConvertApp] Converting notebook /drive/MyDrive/Arclight/Code/BPE_Tokenizer.ipynb to script
+[NbConvertApp] Writing 13298 bytes to /drive/MyDrive/Arclight/Code/BPE_Tokenizer.txt</code></pre>
+</div>
+</div>
+<div id="cell-29" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>os.rename(</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"/drive/MyDrive/Arclight/Code/BPE_Tokenizer.txt"</span>,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"/drive/MyDrive/Arclight/Code/BPE_Tokenizer.py"</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
