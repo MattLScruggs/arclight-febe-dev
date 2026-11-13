@@ -197,7 +197,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="builds-custom-tokenizer-using-subset-of-epidemiological-data" class="level1">
 <h1>Builds custom tokenizer using subset of epidemiological data</h1>
 <p>Import Libraries</p>
-<div id="cell-3" class="cell">
+<div id="cell-3" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter, deque</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> functools <span class="im">import</span> lru_cache</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
@@ -205,7 +205,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Mount Google Drive</p>
-<div id="cell-5" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="ec28772e-2761-4fc1-80bc-c95a6d7c8bff">
+<div id="cell-5" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="2adbc8e2-28d9-4e79-daa3-ad8f66a6ac81" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> google.colab <span class="im">import</span> drive</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>drive.mount(<span class="st">'/drive'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -213,7 +213,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>Define BPE Class</p>
-<div id="cell-7" class="cell">
+<div id="cell-7" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BPETokenizerSimple:</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.vocab <span class="op">=</span> {}</span>
@@ -527,7 +527,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="unit-testing" class="level3">
 <h3 class="anchored" data-anchor-id="unit-testing">Unit Testing</h3>
 <p>Import testing JSONL</p>
-<div id="cell-10" class="cell">
+<div id="cell-10" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>text_data <span class="op">=</span> []</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"/drive/MyDrive/Arclight/Datasets/JSONL_Output/test.jsonl"</span>, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> line <span class="kw">in</span> <span class="bu">file</span>:</span>
@@ -535,31 +535,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>      data<span class="op">=</span>json.loads(line)</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>      text_data.append(data[<span class="st">'text'</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="cell-11" class="cell">
+<div id="cell-11" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>flattened_text <span class="op">=</span> <span class="st">"</span><span class="ch">\n\n</span><span class="st">"</span>.join(text_data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="cell-12" class="cell">
+<div id="cell-12" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tokenizer<span class="op">=</span>BPETokenizerSimple()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="cell-13" class="cell">
+<div id="cell-13" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>tokenizer.train(text<span class="op">=</span>flattened_text, vocab_size<span class="op">=</span><span class="dv">2000</span>, allowed_special<span class="op">=</span>{<span class="st">"&lt;|endoftext|&gt;"</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="cell-14" class="cell">
+<div id="cell-14" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>tokenizer.save_vocab_and_merges(vocab_path<span class="op">=</span><span class="st">"/drive/MyDrive/Arclight/Code/Utils/vocab.json"</span>,</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                                bpe_merges_path<span class="op">=</span><span class="st">"/drive/MyDrive/Arclight/Code/Utils/bpe_merges.txt"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Test encoding and decoding on short sample text</p>
-<div id="cell-16" class="cell">
+<div id="cell-16" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>test_text<span class="op">=</span> <span class="st">"Epidemiology is the scientific study of the distribution and determinants of health-related states or events in specified populations, and the application of this knowledge to control health problems. &lt;|endoftext|&gt; "</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="cell-17" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="e023892a-89b3-4c81-cd0e-92cedae913a2">
+<div id="cell-17" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="e3b76e73-5e92-4ed9-bdce-f06da6f3cfe5" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>token_ids <span class="op">=</span> tokenizer.encode(test_text, allowed_special<span class="op">=</span> <span class="st">"&lt;|endoftext|&gt;"</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(token_ids)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[69, 112, 105, 100, 101, 109, 105, 111, 108, 111, 1984, 337, 256, 116, 104, 101, 538, 101, 110, 116, 105, 102, 309, 287, 116, 117, 100, 121, 256, 111, 102, 256, 116, 104, 101, 256, 100, 292, 116, 582, 98, 117, 116, 105, 111, 110, 282, 110, 100, 256, 100, 101, 116, 101, 114, 109, 105, 110, 97, 110, 116, 115, 256, 111, 102, 317, 101, 304, 116, 104, 45, 114, 101, 108, 97, 116, 101, 100, 287, 116, 97, 116, 101, 115, 256, 111, 114, 256, 101, 118, 101, 110, 116, 115, 256, 105, 110, 436, 101, 401, 102, 105, 101, 100, 297, 111, 112, 392, 97, 116, 105, 111, 110, 413, 282, 110, 100, 256, 116, 104, 101, 692, 815, 99, 97, 116, 105, 111, 110, 256, 111, 102, 256, 116, 104, 292, 474, 110, 111, 119, 108, 101, 100, 103, 101, 256, 116, 111, 288, 111, 110, 116, 114, 111, 108, 317, 101, 304, 116, 104, 903, 111, 98, 108, 101, 109, 390, 256, 60, 124, 101, 110, 100, 111, 102, 116, 101, 120, 116, 124, 62, 256]</code></pre>
 </div>
 </div>
-<div id="cell-18" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="18e49089-33ea-4399-8446-3120eb719c37">
+<div id="cell-18" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="b2aafda4-15c4-483f-d2fc-d9dd254a9882" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of characters:"</span>, <span class="bu">len</span>(test_text))</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of token IDs:"</span>, <span class="bu">len</span>(token_ids))</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Compression ratio:"</span>, <span class="bu">len</span>(token_ids) <span class="op">/</span> <span class="bu">len</span>(test_text))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -569,211 +569,23 @@ Number of token IDs: 182
 Compression ratio: 0.8465116279069768</code></pre>
 </div>
 </div>
-<div id="cell-19" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="201cdf57-6977-45ab-c5ef-d799e0daed74">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> token_id <span class="kw">in</span> token_ids:</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>token_id<span class="sc">}</span><span class="ss"> -&gt; </span><span class="sc">{</span>tokenizer<span class="sc">.</span>decode([token_id])<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>69 -&gt; E
-112 -&gt; p
-105 -&gt; i
-100 -&gt; d
-101 -&gt; e
-109 -&gt; m
-105 -&gt; i
-111 -&gt; o
-108 -&gt; l
-111 -&gt; o
-1984 -&gt; gy
-337 -&gt;  is
-256 -&gt;  
-116 -&gt; t
-104 -&gt; h
-101 -&gt; e
-538 -&gt;  sci
-101 -&gt; e
-110 -&gt; n
-116 -&gt; t
-105 -&gt; i
-102 -&gt; f
-309 -&gt; ic
-287 -&gt;  s
-116 -&gt; t
-117 -&gt; u
-100 -&gt; d
-121 -&gt; y
-256 -&gt;  
-111 -&gt; o
-102 -&gt; f
-256 -&gt;  
-116 -&gt; t
-104 -&gt; h
-101 -&gt; e
-256 -&gt;  
-100 -&gt; d
-292 -&gt; is
-116 -&gt; t
-582 -&gt; ri
-98 -&gt; b
-117 -&gt; u
-116 -&gt; t
-105 -&gt; i
-111 -&gt; o
-110 -&gt; n
-282 -&gt;  a
-110 -&gt; n
-100 -&gt; d
-256 -&gt;  
-100 -&gt; d
-101 -&gt; e
-116 -&gt; t
-101 -&gt; e
-114 -&gt; r
-109 -&gt; m
-105 -&gt; i
-110 -&gt; n
-97 -&gt; a
-110 -&gt; n
-116 -&gt; t
-115 -&gt; s
-256 -&gt;  
-111 -&gt; o
-102 -&gt; f
-317 -&gt;  h
-101 -&gt; e
-304 -&gt; al
-116 -&gt; t
-104 -&gt; h
-45 -&gt; -
-114 -&gt; r
-101 -&gt; e
-108 -&gt; l
-97 -&gt; a
-116 -&gt; t
-101 -&gt; e
-100 -&gt; d
-287 -&gt;  s
-116 -&gt; t
-97 -&gt; a
-116 -&gt; t
-101 -&gt; e
-115 -&gt; s
-256 -&gt;  
-111 -&gt; o
-114 -&gt; r
-256 -&gt;  
-101 -&gt; e
-118 -&gt; v
-101 -&gt; e
-110 -&gt; n
-116 -&gt; t
-115 -&gt; s
-256 -&gt;  
-105 -&gt; i
-110 -&gt; n
-436 -&gt;  sp
-101 -&gt; e
-401 -&gt; ci
-102 -&gt; f
-105 -&gt; i
-101 -&gt; e
-100 -&gt; d
-297 -&gt;  p
-111 -&gt; o
-112 -&gt; p
-392 -&gt; ul
-97 -&gt; a
-116 -&gt; t
-105 -&gt; i
-111 -&gt; o
-110 -&gt; n
-413 -&gt; s,
-282 -&gt;  a
-110 -&gt; n
-100 -&gt; d
-256 -&gt;  
-116 -&gt; t
-104 -&gt; h
-101 -&gt; e
-692 -&gt;  app
-815 -&gt; li
-99 -&gt; c
-97 -&gt; a
-116 -&gt; t
-105 -&gt; i
-111 -&gt; o
-110 -&gt; n
-256 -&gt;  
-111 -&gt; o
-102 -&gt; f
-256 -&gt;  
-116 -&gt; t
-104 -&gt; h
-292 -&gt; is
-474 -&gt;  k
-110 -&gt; n
-111 -&gt; o
-119 -&gt; w
-108 -&gt; l
-101 -&gt; e
-100 -&gt; d
-103 -&gt; g
-101 -&gt; e
-256 -&gt;  
-116 -&gt; t
-111 -&gt; o
-288 -&gt;  c
-111 -&gt; o
-110 -&gt; n
-116 -&gt; t
-114 -&gt; r
-111 -&gt; o
-108 -&gt; l
-317 -&gt;  h
-101 -&gt; e
-304 -&gt; al
-116 -&gt; t
-104 -&gt; h
-903 -&gt;  pr
-111 -&gt; o
-98 -&gt; b
-108 -&gt; l
-101 -&gt; e
-109 -&gt; m
-390 -&gt; s.
-256 -&gt;  
-60 -&gt; &lt;
-124 -&gt; |
-101 -&gt; e
-110 -&gt; n
-100 -&gt; d
-111 -&gt; o
-102 -&gt; f
-116 -&gt; t
-101 -&gt; e
-120 -&gt; x
-116 -&gt; t
-124 -&gt; |
-62 -&gt; &gt;
-256 -&gt;  </code></pre>
-</div>
-</div>
 <p>Test encoding and decoding on much longer text</p>
-<div id="cell-21" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>long_text <span class="op">=</span> []</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"/drive/MyDrive/Arclight/Datasets/JSONL_Output/mmwr_archive.jsonl"</span>, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> line <span class="kw">in</span> <span class="bu">file</span>:</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> line.strip():</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>      data<span class="op">=</span>json.loads(line)</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>      long_text.append(data[<span class="st">'text_content'</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="cell-20" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>long_text <span class="op">=</span> []</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"/drive/MyDrive/Arclight/Datasets/JSONL_Output/mmwr_archive.jsonl"</span>, <span class="st">"r"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> line <span class="kw">in</span> <span class="bu">file</span>:</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> line.strip():</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>      data<span class="op">=</span>json.loads(line)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>      long_text.append(data[<span class="st">'text_content'</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="cell-22" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>flattened_long_text <span class="op">=</span> <span class="st">"</span><span class="ch">\n\n</span><span class="st">"</span>.join([text <span class="cf">for</span> text <span class="kw">in</span> long_text <span class="cf">if</span> text <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> <span class="bu">isinstance</span>(text, <span class="bu">str</span>)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="cell-21" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>flattened_long_text <span class="op">=</span> <span class="st">"</span><span class="ch">\n\n</span><span class="st">"</span>.join([text <span class="cf">for</span> text <span class="kw">in</span> long_text <span class="cf">if</span> text <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> <span class="bu">isinstance</span>(text, <span class="bu">str</span>)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="cell-23" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="9ef7a6f1-50b2-4a04-a94b-8cf2b91376b3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>long_test_token_ids <span class="op">=</span> tokenizer.encode(flattened_long_text)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of characters:"</span>, <span class="bu">len</span>(flattened_long_text))</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of token IDs:"</span>, <span class="bu">len</span>(long_test_token_ids))</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Compression ratio:"</span>, <span class="bu">len</span>(long_test_token_ids) <span class="op">/</span> <span class="bu">len</span>(flattened_long_text))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="cell-22" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="10c27dab-e83e-4690-a7d6-4f0349719aba" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>long_test_token_ids <span class="op">=</span> tokenizer.encode(flattened_long_text)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of characters:"</span>, <span class="bu">len</span>(flattened_long_text))</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of token IDs:"</span>, <span class="bu">len</span>(long_test_token_ids))</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Compression ratio:"</span>, <span class="bu">len</span>(long_test_token_ids) <span class="op">/</span> <span class="bu">len</span>(flattened_long_text))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Number of characters: 116101401
 Number of token IDs: 52380154
@@ -781,30 +593,82 @@ Compression ratio: 0.4511586729259193</code></pre>
 </div>
 </div>
 <p>Testing saving and retrieval</p>
-<div id="cell-25" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>tokenizer2 <span class="op">=</span> BPETokenizerSimple()</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>tokenizer2.load_vocab_and_merges(vocab_path<span class="op">=</span><span class="st">"/drive/MyDrive/Arclight/Code/Utils/vocab.json"</span>,</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>                                bpe_merges_path<span class="op">=</span><span class="st">"/drive/MyDrive/Arclight/Code/Utils/bpe_merges.txt"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="cell-24" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>tokenizer2 <span class="op">=</span> BPETokenizerSimple()</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>tokenizer2.load_vocab_and_merges(vocab_path<span class="op">=</span><span class="st">"/drive/MyDrive/Arclight/Code/Utils/vocab.json"</span>,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>                                bpe_merges_path<span class="op">=</span><span class="st">"/drive/MyDrive/Arclight/Code/Utils/bpe_merges.txt"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="cell-26" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="166a22de-e9ec-46cc-c610-5e2d7e8443cc">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tokenizer2.decode(token_ids))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="cell-25" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="86ebc913-9da2-4aa0-f6a7-8e126a5e513a" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tokenizer2.decode(token_ids))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Epidemiology is the scientific study of the distribution and determinants of health-related states or events in specified populations, and the application of this knowledge to control health problems. &lt;|endoftext|&gt; </code></pre>
 </div>
 </div>
+<p>Build full tokenizer and save, this time using HuggingFace’s tokenizer library</p>
+<div id="cell-27" class="cell" data-execution_count="31">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tokenizers <span class="im">import</span> Tokenizer</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tokenizers.models <span class="im">import</span> BPE</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tokenizers.trainers <span class="im">import</span> BpeTrainer</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tokenizers.pre_tokenizers <span class="im">import</span> ByteLevel</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tokenizers.processors <span class="im">import</span> ByteLevel <span class="im">as</span> ByteLevelProcessor</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tokenizers.decoders <span class="im">import</span> ByteLevel <span class="im">as</span> ByteLevelDecoder</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-28" class="cell" data-execution_count="18">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> Tokenizer(BPE(unk_token<span class="op">=</span><span class="st">"&lt;unk&gt;"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-29" class="cell" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>tokenizer.pre_tokenizer <span class="op">=</span> ByteLevel(add_prefix_space<span class="op">=</span><span class="va">False</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-30" class="cell" data-execution_count="20">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>trainer <span class="op">=</span> BpeTrainer(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    vocab_size<span class="op">=</span><span class="dv">32768</span>,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    special_tokens<span class="op">=</span>[</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"&lt;unk&gt;"</span>,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"&lt;|endoftext|&gt;"</span>,</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    show_progress<span class="op">=</span><span class="va">True</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-31" class="cell" data-execution_count="23">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>tokenizer.train_from_iterator([flattened_long_text], trainer)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-32" class="cell" data-execution_count="24">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>tokenizer.post_processor <span class="op">=</span> ByteLevelProcessor(trim_offsets<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-33" class="cell" data-execution_count="25">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>tokenizer.save(<span class="st">"/drive/MyDrive/Arclight/Code/Utils/hf_tokenizer.json"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Testing the new tokenizer</p>
+<div id="cell-35" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="7b1dae1c-2b72-466a-d47a-d6007209f826" data-execution_count="27">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>token_ids_2<span class="op">=</span>tokenizer.encode(test_text)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(token_ids_2.ids)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[37, 1557, 1178, 285, 130, 9578, 1130, 120, 130, 3319, 122, 6268, 120, 341, 13, 1410, 992, 170, 2041, 117, 4909, 2168, 12, 122, 130, 6995, 120, 442, 4969, 147, 1360, 341, 4227, 14, 94, 1, 94]</code></pre>
+</div>
+</div>
+<div id="cell-36" class="cell" data-execution_count="32">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>tokenizer.decoder <span class="op">=</span> ByteLevelDecoder()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-37" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="794d0003-17fb-461b-b96c-6d0b82e8cdac" data-execution_count="33">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>decoded_text <span class="op">=</span> tokenizer.decode(token_ids_2.ids)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(decoded_text)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Epidemiology is the scientific study of the distribution and determinants of health-related states or events in specified populations, and the application of this knowledge to control health problems.  </code></pre>
+</div>
+</div>
 <p>Save notebook as script for later function importing</p>
-<div id="cell-28" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="151e32bd-6c0d-460e-e62b-e6eefdea9e51">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>jupyter nbconvert <span class="op">--</span>to script <span class="st">"/drive/MyDrive/Arclight/Code/BPE_Tokenizer.ipynb"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="cell-39" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{&quot;base_uri&quot;:&quot;https://localhost:8080/&quot;}}" data-outputid="4f365757-7fc0-4f5d-b54e-9f9cb4b367ea" data-execution_count="34">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>jupyter nbconvert <span class="op">--</span>to script <span class="st">"/drive/MyDrive/Arclight/Code/BPE_Tokenizer.ipynb"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[NbConvertApp] Converting notebook /drive/MyDrive/Arclight/Code/BPE_Tokenizer.ipynb to script
-[NbConvertApp] Writing 13298 bytes to /drive/MyDrive/Arclight/Code/BPE_Tokenizer.txt</code></pre>
+[NbConvertApp] Writing 14184 bytes to /drive/MyDrive/Arclight/Code/BPE_Tokenizer.txt</code></pre>
 </div>
 </div>
-<div id="cell-29" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>os.rename(</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"/drive/MyDrive/Arclight/Code/BPE_Tokenizer.txt"</span>,</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"/drive/MyDrive/Arclight/Code/BPE_Tokenizer.py"</span></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="cell-40" class="cell" data-execution_count="35">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>os.rename(</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"/drive/MyDrive/Arclight/Code/BPE_Tokenizer.txt"</span>,</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"/drive/MyDrive/Arclight/Code/BPE_Tokenizer.py"</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 
